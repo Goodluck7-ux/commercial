@@ -21,6 +21,7 @@ model User {
   role          String    @default("customer")
   sessions      Session[]
   accounts      Account[]
+  storeMembers  StoreMember[]
 
   @@unique([email])
   @@map("user")
@@ -72,4 +73,48 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+enum StoreStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+  SUSPENDED
+}
+
+enum StoreRole {
+  OWNER
+  MANAGER
+  STAFF
+}
+
+model Store {
+  id                 String        @id @default(cuid())
+  name               String
+  slug               String        @unique
+  description        String?
+  logoUrl            String?
+  status             StoreStatus   @default(PENDING)
+  commissionBps      Int           @default(500)
+  payoutSubaccountId String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  members            StoreMember[]
+
+  @@index([status])
+  @@map("store")
+}
+
+model StoreMember {
+  id        String    @id @default(cuid())
+  storeId   String
+  userId    String
+  role      StoreRole @default(STAFF)
+  createdAt DateTime  @default(now())
+  store     Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, userId])
+  @@index([userId])
+  @@map("store_member")
 }
