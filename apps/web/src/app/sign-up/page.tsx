@@ -2,7 +2,7 @@ import { AuthForm } from '@/components/auth-form';
 
 export default function SignUpPage() {
   return (
-    <main className="mx-auto max-w-sm p-10">
+    <main className="mx-auto max-w-md px-5 py-12">
       <AuthForm mode="sign-up" />
     </main>
   );

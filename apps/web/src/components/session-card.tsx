@@ -25,6 +25,13 @@ export function SessionCard() {
             <p className="text-sm text-gray-500">
                 {session.user.email} ({session.user.role})
             </p>
+
+            <div className="mt-4 flex flex-wrap gap-4 text-sm">
+                <Link href="/vendor" className="underline">Sell on Commercial</Link>
+                {session.user.role === 'admin' && (
+                    <Link href="/admin/stores" className="underline">Store applications</Link>
+                )}
+            </div>
             <button
                 onClick={async () => {
                     await authClient.signOut();

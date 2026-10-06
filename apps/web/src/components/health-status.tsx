@@ -1,38 +1,31 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api';
 
-type Health = { status: string; service: string; timestamp: string };
+type Health = { status: string };
 
 export function HealthStatus() {
-    const { data, isPending, isError, refetch } = useQuery({
+    const { data, isPending, isError } = useQuery({
         queryKey: ['health'],
         queryFn: () => apiFetch<Health>('/health'),
+        refetchInterval: 30000,
     });
 
-    async function recheck() {
-        const result = await refetch();
-        if (result.isError) toast.error('API is unreachable');
-        else toast.success('API is healthy');
-    }
+    const ok = data?.status === 'ok';
+    const label = isPending
+        ? 'Checking system'
+        : isError
+            ? 'API unreachable'
+            : ok
+                ? 'All systems normal'
+                : 'Database degraded';
+    const dot = isPending ? 'bg-muted' : ok ? 'bg-ok' : 'bg-bad';
 
     return (
-        <div className="rounded-xl border p-6">
-            <p className="text-sm text-gray-500">API status</p>
-            <p className="text-2xl font-semibold">
-                {isPending && 'Checking...'}
-                {isError && 'Unreachable'}
-                {data && `${data.service}: ${data.status}`}
-            </p>
-            {data && <p className="text-sm text-gray-500">{data.timestamp}</p>}
-            <button
-                onClick={recheck}
-                className="mt-4 rounded-lg bg-black px-4 py-2 text-white"
-            >
-                Check again
-            </button>
-        </div>
+        <span className="inline-flex items-center gap-2 text-xs text-muted">
+            <span className={`size-2 rounded-full ${dot}`} />
+            {label}
+        </span>
     );
 }

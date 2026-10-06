@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { authClient } from '@/lib/auth-client';
+import { Button, Card, Field, inputClass } from '@/components/ui';
 
 type Mode = 'sign-in' | 'sign-up';
 
@@ -19,7 +20,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
     const submit = useMutation({
         mutationFn: async () => {
             const { error } = isSignUp
-                ? await authClient.signUp.email({ name, email, password, role: 'user' })
+                ? await authClient.signUp.email({ name, email, password, role: 'customer' })
                 : await authClient.signIn.email({ email, password });
             if (error) throw new Error(error.message || 'Something went wrong');
         },
@@ -30,72 +31,76 @@ export function AuthForm({ mode }: { mode: Mode }) {
         onError: (e: Error) => toast.error(e.message),
     });
 
-    const input = 'w-full rounded-lg border px-3 py-2';
-
     return (
-        <form
-            onSubmit={(e) => {
-                e.preventDefault();
-                submit.mutate();
-            }}
-            className="space-y-4"
-        >
-            <h1 className="text-2xl font-bold">
-                {isSignUp ? 'Create your account' : 'Sign in'}
+        <Card className="p-7">
+            <h1 className="text-2xl font-bold tracking-tight">
+                {isSignUp ? 'Create your account' : 'Welcome back'}
             </h1>
+            <p className="mt-1 text-sm text-muted">
+                {isSignUp
+                    ? 'Shop, or apply to open your own store.'
+                    : 'Sign in to manage your account and stores.'}
+            </p>
 
-            {isSignUp && (
-                <div>
-                    <label htmlFor="name" className="mb-1 block text-sm">Name</label>
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    submit.mutate();
+                }}
+                className="mt-6 space-y-4"
+            >
+                {isSignUp && (
+                    <Field id="name" label="Full name">
+                        <input
+                            id="name"
+                            className={inputClass}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            autoComplete="name"
+                            required
+                        />
+                    </Field>
+                )}
+
+                <Field id="email" label="Email">
                     <input
-                        id="name"
-                        className={input}
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        id="email"
+                        type="email"
+                        className={inputClass}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        autoComplete="email"
                         required
                     />
-                </div>
-            )}
+                </Field>
 
-            <div>
-                <label htmlFor="email" className="mb-1 block text-sm">Email</label>
-                <input
-                    id="email"
-                    type="email"
-                    className={input}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-            </div>
+                <Field id="password" label="Password" hint={isSignUp ? 'At least 8 characters.' : undefined}>
+                    <input
+                        id="password"
+                        type="password"
+                        className={inputClass}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                        minLength={8}
+                        required
+                    />
+                </Field>
 
-            <div>
-                <label htmlFor="password" className="mb-1 block text-sm">Password</label>
-                <input
-                    id="password"
-                    type="password"
-                    className={input}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    minLength={8}
-                    required
-                />
-            </div>
+                <Button type="submit" disabled={submit.isPending} className="w-full">
+                    {submit.isPending ? 'Please wait...' : isSignUp ? 'Create account' : 'Sign in'}
+                </Button>
+            </form>
 
-            <button
-                type="submit"
-                disabled={submit.isPending}
-                className="w-full rounded-lg bg-black px-4 py-2 text-white disabled:opacity-60"
-            >
-                {submit.isPending ? 'Please wait...' : isSignUp ? 'Sign up' : 'Sign in'}
-            </button>
-
-            <p className="text-sm text-gray-500">
+            <p className="mt-6 text-center text-sm text-muted">
                 {isSignUp ? 'Already have an account? ' : 'New here? '}
-                <Link href={isSignUp ? '/sign-in' : '/sign-up'} className="underline">
+                <Link
+                    href={isSignUp ? '/sign-in' : '/sign-up'}
+                    className="font-medium text-brand hover:underline"
+                >
                     {isSignUp ? 'Sign in' : 'Create an account'}
                 </Link>
             </p>
-        </form>
+        </Card>
     );
 }
