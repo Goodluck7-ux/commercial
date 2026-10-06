@@ -7,12 +7,13 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { auth } from './lib/auth.js';
 import { StoresModule } from './stores/stores.module.js';
+import { CatalogModule } from './catalog/catalog.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
 @Module({
   imports: [
-    PrismaModule, AuthModule.forRoot({ auth }), StoresModule,
+    PrismaModule, AuthModule.forRoot({ auth }), StoresModule, CatalogModule,
     // Distributed tracing, auto-correlated logs, request/job metrics, error
     // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com
     ObserveModule.forRoot({

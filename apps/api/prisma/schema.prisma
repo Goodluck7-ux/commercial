@@ -100,6 +100,7 @@ model Store {
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
   members            StoreMember[]
+  products           Product[]
 
   @@index([status])
   @@map("store")
@@ -117,4 +118,53 @@ model StoreMember {
   @@unique([storeId, userId])
   @@index([userId])
   @@map("store_member")
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum ProductCategory {
+  FASHION
+  BEAUTY
+  HOME
+  ELECTRONICS
+  FOOD
+  OTHER
+}
+
+model Product {
+  id          String          @id @default(cuid())
+  storeId     String
+  name        String
+  slug        String
+  description String?
+  category    ProductCategory @default(OTHER)
+  status      ProductStatus   @default(DRAFT)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  store       Store           @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  variants    Variant[]
+
+  @@unique([storeId, slug])
+  @@index([storeId, status])
+  @@index([status, category])
+  @@map("product")
+}
+
+model Variant {
+  id        String   @id @default(cuid())
+  productId String
+  name      String   @default("Default")
+  sku       String?
+  priceKobo Int
+  stock     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("variant")
 }
